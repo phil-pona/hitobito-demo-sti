@@ -75,7 +75,6 @@ oc env dc hitobito-rails \
       -e MEMCACHE_SERVERS=memchache:11211
 ```
 
-pitc-rails-bi-prod/ose3-rails
 
 #### DB Migrations
 
@@ -100,10 +99,10 @@ download s2i binary from https://github.com/openshift/source-to-image
 
 run
 ```
-s2i build --scripts-url=file://.s2i/bin . openshift/ruby-22-centos7 hitobito-s2i-exmaple
+s2i build --scripts-url=file://.s2i/bin . centos/ruby-22-centos7 hitobito-s2i-exmaple
 ```
 
 
 ## TODO
 
-Logging to standard out
+* Logging to standard out

@@ -36,6 +36,8 @@ mkdir -p ./vendor/wagons/
 cp -a /tmp/src/hitobito/. ./
 cp -a /tmp/src/hitobito_generic ./vendor/wagons/
 
+cp -a ./overwrite/config.ru ./config.ru
+
 chmod -R 777 /opt/app-root/src/log
 
 echo "---> Building your Ruby application from source ..."
@@ -54,6 +56,8 @@ fi
 if [[ "$RAILS_ENV" == "production" || "$RACK_ENV" == "production" ]]; then
   rake_assets_precompile
 fi
+
+
 
 # Fix source directory permissions
 fix-permissions ./
