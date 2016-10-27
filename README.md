@@ -41,9 +41,9 @@ oc new-app mysql-ephemeral \
      -pMYSQL_DATABASE=hitobito -pDATABASE_SERVICE_NAME=mysql
 ```
 
-Create application
+Create application (s2i ruby standards)
 ```
-oc new-app openshift/ruby-22-centos7~https://github.com/phil-pona/hitobito-demo-sti.git --name=hitobito
+oc new-app centos/ruby-22-centos7~https://github.com/phil-pona/hitobito-demo-sti.git --name=hitobito
 oc expose service hitobito 
 oc env dc hitobito \
       -e RAILS_ENV=production \
@@ -57,6 +57,25 @@ oc env dc hitobito \
       -e RAILS_SPHINX_HOST=sphinx \
       -e MEMCACHE_SERVERS=memchache:11211
 ```
+
+Create application (pitc rails)
+```
+oc new-app pitc-rails-bi-prod/ose3-rails~https://github.com/phil-pona/hitobito-demo-sti.git --name=hitobito-rails
+oc expose service hitobito-rails 
+oc env dc hitobito-rails \
+      -e RAILS_ENV=production \
+      -e RAILS_SERVE_STATIC_FILES=1  \
+      -e RAILS_DB_NAME=hitobito \
+      -e RAILS_DB_HOST=mysql \
+      -e RAILS_DB_USERNAME=hitobito \
+      -e RAILS_DB_PASSWORD=hitobito \
+      -e RAILS_DB_ADAPTER=mysql2 \
+      -e RAILS_HOST_NAME=hitobito-pitc-hitobito-rails-test.ose3.puzzle.ch \
+      -e RAILS_SPHINX_HOST=sphinx \
+      -e MEMCACHE_SERVERS=memchache:11211
+```
+
+pitc-rails-bi-prod/ose3-rails
 
 #### DB Migrations
 
