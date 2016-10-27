@@ -55,7 +55,7 @@ oc env dc hitobito \
       -e RAILS_DB_ADAPTER=mysql2 \
       -e RAILS_HOST_NAME=hitobito-pitc-hitobito-test.ose3.puzzle.ch \
       -e RAILS_SPHINX_HOST=sphinx \
-      -e MEMCACHE_SERVERS=memchache:11211 \
+      -e MEMCACHE_SERVERS=memcached:11211 \
       -e RAILS_ROOT_USER_EMAIL=hitobito@puzzle.ch 
 ```
 
@@ -73,7 +73,7 @@ oc env dc hitobito-rails \
       -e RAILS_DB_ADAPTER=mysql2 \
       -e RAILS_HOST_NAME=hitobito-pitc-hitobito-rails-test.ose3.puzzle.ch \
       -e RAILS_SPHINX_HOST=sphinx \
-      -e MEMCACHE_SERVERS=memchache:11211 \
+      -e MEMCACHE_SERVERS=memcached:11211 \
       -e RAILS_ROOT_USER_EMAIL=hitobito@puzzle.ch 
 ```
 
@@ -84,7 +84,6 @@ Mail config
               name: RAILS_MAIL_DELIVERY_CONFIG
               value: 'address: mail.example.com, port: 25'
 ```
-
 
 #### Recreate deployment strategy
 
@@ -123,6 +122,14 @@ Livecycle hock
             - 'bundle exec rake db:migrate db:seed wagon:setup'
           containerName: hitobito
 ```
+
+### Memcached
+
+oc new-app https://github.com/appuio/memcached.git  --strategy=docker --name=memcached
+
+### Sphinx
+
+oc new-app https://github.com/appuio/sphinxsearch.git  --strategy=docker --name=sphinx
 
 ## HTTPS Route
 
