@@ -44,15 +44,16 @@ oc new-app mysql-ephemeral \
 Create application
 ```
 oc new-app openshift/ruby-22-centos7~https://github.com/phil-pona/hitobito-demo-sti.git --name=hitobito
+oc expose service hitobito 
 oc env dc hitobito \
       -e RAILS_ENV=production \
       -e RAILS_SERVE_STATIC_FILES=1  \
       -e RAILS_DB_NAME=hitobito \
       -e RAILS_DB_HOST=mysql \
-      -e RAILS_DB_USERNAME=hitobito \ 
-      -e RAILS_DB_PASSWORD=hitobito \ 
-      -e RAILS_DB_ADAPTER=mysql2 \ 
-      -e RAILS_HOST_NAME=hitobito 
+      -e RAILS_DB_USERNAME=hitobito \
+      -e RAILS_DB_PASSWORD=hitobito \
+      -e RAILS_DB_ADAPTER=mysql2 \
+      -e RAILS_HOST_NAME=hitobito-pitc-hitobito-test.ose3.puzzle.ch 
 ```
 
 #### DB Migrations
@@ -80,3 +81,8 @@ run
 ```
 s2i build --scripts-url=file://.s2i/bin . openshift/ruby-22-centos7 hitobito-s2i-exmaple
 ```
+
+
+## TODO
+
+Logging to standard out
