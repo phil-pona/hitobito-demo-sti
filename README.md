@@ -77,6 +77,14 @@ oc env dc hitobito-rails \
       -e RAILS_ROOT_USER_EMAIL=hitobito@puzzle.ch 
 ```
 
+Mail config
+
+```
+-
+              name: RAILS_MAIL_DELIVERY_CONFIG
+              value: 'address: mail.example.com, port: 25'
+```
+
 
 #### Recreate deployment strategy
 
