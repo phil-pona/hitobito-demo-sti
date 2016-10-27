@@ -53,7 +53,9 @@ oc env dc hitobito \
       -e RAILS_DB_USERNAME=hitobito \
       -e RAILS_DB_PASSWORD=hitobito \
       -e RAILS_DB_ADAPTER=mysql2 \
-      -e RAILS_HOST_NAME=hitobito-pitc-hitobito-test.ose3.puzzle.ch 
+      -e RAILS_HOST_NAME=hitobito-pitc-hitobito-test.ose3.puzzle.ch \
+      -e RAILS_SPHINX_HOST=sphinx \
+      -e MEMCACHE_SERVERS=memchache:11211
 ```
 
 #### DB Migrations
