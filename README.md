@@ -55,7 +55,8 @@ oc env dc hitobito \
       -e RAILS_DB_ADAPTER=mysql2 \
       -e RAILS_HOST_NAME=hitobito-pitc-hitobito-test.ose3.puzzle.ch \
       -e RAILS_SPHINX_HOST=sphinx \
-      -e MEMCACHE_SERVERS=memchache:11211
+      -e MEMCACHE_SERVERS=memchache:11211 \
+      -e RAILS_ROOT_USER_EMAIL=hitobito@puzzle.ch 
 ```
 
 Create application (pitc rails)
@@ -72,9 +73,34 @@ oc env dc hitobito-rails \
       -e RAILS_DB_ADAPTER=mysql2 \
       -e RAILS_HOST_NAME=hitobito-pitc-hitobito-rails-test.ose3.puzzle.ch \
       -e RAILS_SPHINX_HOST=sphinx \
-      -e MEMCACHE_SERVERS=memchache:11211
+      -e MEMCACHE_SERVERS=memchache:11211 \
+      -e RAILS_ROOT_USER_EMAIL=hitobito@puzzle.ch 
 ```
 
+
+#### Recreate deployment strategy
+
+edit in dc
+
+```
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+```
+
+#### incremental Build
+
+edit in bc
+
+```
+sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: 'ruby-22-centos7:latest'
+      incremental: true
+```
 
 #### DB Migrations
 
@@ -89,6 +115,10 @@ Livecycle hock
             - 'bundle exec rake db:migrate db:seed wagon:setup'
           containerName: hitobito
 ```
+
+## HTTPS Route
+
+Letsencrypt
 
 ## Configuration
 

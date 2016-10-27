@@ -35,6 +35,7 @@ mkdir -p ./vendor/wagons/
 
 cp -a /tmp/src/hitobito/. ./
 cp -a /tmp/src/hitobito_generic ./vendor/wagons/
+cp -a config/rpm/Wagonfile .
 
 cp -a ./overwrite/config.ru ./config.ru
 
