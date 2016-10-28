@@ -27,7 +27,7 @@ shopt -s dotglob
 echo "---> Installing application source ..."
 mv /tmp/src/* ./
 
-# download basic hitobito core and generic wagon
+# download basic hitobito core and generic wagon from master branch
 git clone -b master --single-branch https://github.com/hitobito/hitobito.git /tmp/hitobito
 git clone -b master --single-branch https://github.com/hitobito/hitobito_generic.git /tmp/hitobito_generic
 
@@ -35,6 +35,7 @@ mv /tmp/hitobito/* ./
 mv /tmp/hitobito_generic ./vendor/wagons/
 cp -a config/rpm/Wagonfile .
 cp -a ./overwrite/config.ru ./config.ru
+cp -a ./overwrite/bin/delay.sh ./delay.sh
 
 chmod -R 777 /opt/app-root/src/log
 
