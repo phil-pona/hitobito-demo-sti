@@ -27,12 +27,12 @@ shopt -s dotglob
 echo "---> Installing application source ..."
 mv /tmp/src/* ./
 
-mkdir -p ./vendor/wagons/
-
 # download basic hitobito core and generic wagon
-git clone https://github.com/hitobito/hitobito.git
-git clone https://github.com/hitobito/hitobito_generic.git ./vendor/wagons/
+git clone -b master --single-branch https://github.com/hitobito/hitobito.git /tmp/hitobito
+git clone -b master --single-branch https://github.com/hitobito/hitobito_generic.git /tmp/hitobito_generic
 
+mv /tmp/hitobito/* ./
+mv /tmp/hitobito_generic ./vendor/wagons/
 cp -a config/rpm/Wagonfile .
 cp -a ./overwrite/config.ru ./config.ru
 
@@ -54,8 +54,6 @@ fi
 if [[ "$RAILS_ENV" == "production" || "$RACK_ENV" == "production" ]]; then
   rake_assets_precompile
 fi
-
-
 
 # Fix source directory permissions
 fix-permissions ./
