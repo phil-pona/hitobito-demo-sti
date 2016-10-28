@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bundle exex rake jobs:work
+bundle exec rake jobs:work
