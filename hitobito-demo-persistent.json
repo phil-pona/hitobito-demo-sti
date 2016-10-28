@@ -1,0 +1,1131 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "hitobito-demo",
+        "creationTimestamp": null
+    },
+    "objects": [
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "hitobito",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "hitobito"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {}
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "https://github.com/phil-pona/hitobito-demo-sti.git"
+                    },
+                    "secrets": []
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "centos/ruby-22-centos7:latest"
+                        },
+                        "incremental": true
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "hitobito:latest"
+                    }
+                },
+                "resources": {},
+                "postCommit": {}
+            },
+            "status": {
+                "lastVersion": 0
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "memcached",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "memcached"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {}
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "https://github.com/appuio/memcached.git"
+                    },
+                    "secrets": []
+                },
+                "strategy": {
+                    "type": "Docker"
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "memcached:latest"
+                    }
+                },
+                "resources": {},
+                "postCommit": {}
+            },
+            "status": {
+                "lastVersion": 0
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "sphinx",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "sphinx"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {}
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "https://github.com/appuio/sphinxsearch.git"
+                    },
+                    "secrets": []
+                },
+                "strategy": {
+                    "type": "Docker"
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "sphinx:latest"
+                    }
+                },
+                "resources": {},
+                "postCommit": {}
+            },
+            "status": {
+                "lastVersion": 0
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "hitobito",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "hitobito"
+                }
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "memcached",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "memcached"
+                }
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "sphinx",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "sphinx"
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "hitobito",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "hitobito"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate",
+                    "recreateParams": {
+                        "timeoutSeconds": 600,
+                        "pre": {
+                            "failurePolicy": "Abort",
+                            "execNewPod": {
+                                "command": [
+                                    "/usr/bin/bash",
+                                    "-c",
+                                    "bundle exec rake db:migrate db:seed wagon:setup"
+                                ],
+                                "containerName": "hitobito"
+                            }
+                        }
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "hitobito"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "hitobito:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "hitobito",
+                    "deploymentconfig": "hitobito"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "hitobito",
+                            "deploymentconfig": "hitobito"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "hitobito",
+                                "image": "hitobito",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "RAILS_ENV",
+                                        "value": "${RAILS_ENV}"
+                                    },
+                                    {
+                                        "name": "RAILS_SERVE_STATIC_FILES",
+                                        "value": "${RAILS_SERVE_STATIC_FILES}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_NAME",
+                                        "value": "${MYSQL_DATABASE}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_HOST",
+                                        "value": "${RAILS_DB_HOST}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_USERNAME",
+                                        "value": "${MYSQL_USER}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_PASSWORD",
+                                        "value": "${MYSQL_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_ADAPTER",
+                                        "value": "${RAILS_DB_ADAPTER}"
+                                    },
+                                    {
+                                        "name": "RAILS_HOST_NAME",
+                                        "value": "${RAILS_HOST_NAME}"
+                                    },
+                                    {
+                                        "name": "RAILS_SPHINX_HOST",
+                                        "value": "${RAILS_SPHINX_HOST}"
+                                    },
+                                    {
+                                        "name": "MEMCACHE_SERVERS",
+                                        "value": "${MEMCACHE_SERVERS}"
+                                    },
+                                    {
+                                        "name": "RAILS_ROOT_USER_EMAIL",
+                                        "value": "${RAILS_ROOT_USER_EMAIL}"
+                                    },
+                                    {
+                                        "name": "RAILS_MAIL_DELIVERY_CONFIG",
+                                        "value": "${RAILS_MAIL_DELIVERY_CONFIG}"
+                                    }
+                                ],
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            },
+            "status": {}
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "hitobito-delay",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "hitobito"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate",
+                    "recreateParams": {
+                        "timeoutSeconds": 600
+
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "hitobito-delay"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "hitobito:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "hitobito",
+                    "deploymentconfig": "hitobito-delay"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "hitobito",
+                            "deploymentconfig": "hitobito-delay"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "hitobito-delay",
+                                "image": "hitobito",
+                                "command": [
+                                    "rake"
+                                ],
+                                "args": [
+                                    "jobs:work"
+                                ],
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "RAILS_ENV",
+                                        "value": "${RAILS_ENV}"
+                                    },
+                                    {
+                                        "name": "RAILS_SERVE_STATIC_FILES",
+                                        "value": "${RAILS_SERVE_STATIC_FILES}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_NAME",
+                                        "value": "${MYSQL_DATABASE}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_HOST",
+                                        "value": "${RAILS_DB_HOST}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_USERNAME",
+                                        "value": "${MYSQL_USER}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_PASSWORD",
+                                        "value": "${MYSQL_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "RAILS_DB_ADAPTER",
+                                        "value": "${RAILS_DB_ADAPTER}"
+                                    },
+                                    {
+                                        "name": "RAILS_HOST_NAME",
+                                        "value": "${RAILS_HOST_NAME}"
+                                    },
+                                    {
+                                        "name": "RAILS_SPHINX_HOST",
+                                        "value": "${RAILS_SPHINX_HOST}"
+                                    },
+                                    {
+                                        "name": "MEMCACHE_SERVERS",
+                                        "value": "${MEMCACHE_SERVERS}"
+                                    },
+                                    {
+                                        "name": "RAILS_ROOT_USER_EMAIL",
+                                        "value": "${RAILS_ROOT_USER_EMAIL}"
+                                    },
+                                    {
+                                        "name": "RAILS_MAIL_DELIVERY_CONFIG",
+                                        "value": "${RAILS_MAIL_DELIVERY_CONFIG}"
+                                    }
+                                ],
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            },
+            "status": {}
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "memcached",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "memcached"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "memcached"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "memcached:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "memcached",
+                    "deploymentconfig": "memcached"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "memcached",
+                            "deploymentconfig": "memcached"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "memcached",
+                                "image": "memcached",
+                                "ports": [
+                                    {
+                                        "containerPort": 11211,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "mysql",
+                "creationTimestamp": null,
+                "labels": {
+                    "template": "mysql-persistent-template"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate",
+                    "recreateParams": {
+                        "timeoutSeconds": 600
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "mysql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "openshift",
+                                "name": "mysql:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "name": "mysql"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "name": "mysql"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "mysql-data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "mysql"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "mysql",
+                                "image": "registry.access.redhat.com/rhscl/mysql-56-rhel7:latest",
+                                "ports": [
+                                    {
+                                        "containerPort": 3306,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${MYSQL_USER}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${MYSQL_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "${MYSQL_DATABASE}"
+                                    }
+                                ],
+                                "resources": {
+                                    "limits": {
+                                        "memory": "512Mi"
+                                    }
+                                },
+                                "volumeMounts": [
+                                    {
+                                        "name": "mysql-data",
+                                        "mountPath": "/var/lib/mysql/data"
+                                    }
+                                ],
+                                "livenessProbe": {
+                                    "tcpSocket": {
+                                        "port": 3306
+                                    },
+                                    "initialDelaySeconds": 30,
+                                    "timeoutSeconds": 1,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "readinessProbe": {
+                                    "exec": {
+                                        "command": [
+                                            "/bin/sh",
+                                            "-i",
+                                            "-c",
+                                            "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"
+                                        ]
+                                    },
+                                    "initialDelaySeconds": 5,
+                                    "timeoutSeconds": 1,
+                                    "periodSeconds": 10,
+                                    "successThreshold": 1,
+                                    "failureThreshold": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "IfNotPresent"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "mysql-backup-persistent",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "mysql-simple-backup-container"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "mysql-simple-backup-container",
+                    "deploymentconfig": "mysql-backup-persistent"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "mysql-simple-backup-container",
+                            "deploymentconfig": "backup"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "backup-data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "backuppvc"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "mysql-simple-backup-container",
+                                "image": "172.30.1.1:5000/openshift/mysql-simple-backup-container",
+                                "env": [
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${MYSQL_USER}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${MYSQL_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MYSQL_SERVICE_HOST",
+                                        "value": "mysql"
+                                    },
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "${MYSQL_DATABASE}"
+                                    },
+                                    {
+                                        "name": "BACKUP_DATA_DIR",
+                                        "value": "${BACKUP_DATA_DIR}"
+                                    },
+                                    {
+                                        "name": "BACKUP_KEEP",
+                                        "value": "${BACKUP_KEEP}"
+                                    },
+                                    {
+                                        "name": "BACKUP_MINUTE",
+                                        "value": "${BACKUP_MINUTE}"
+                                    },
+                                    {
+                                        "name": "BACKUP_HOUR",
+                                        "value": "${BACKUP_HOUR}"
+                                    }
+                                ],
+                                "resources": {},
+                                "volumeMounts": [
+                                    {
+                                        "name": "backup-data",
+                                        "mountPath": "/opt/app-root/backup/"
+                                    }
+                                ],
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "sphinx",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "sphinx"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {}
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "sphinx"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "sphinx:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "sphinx",
+                    "deploymentconfig": "sphinx"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "sphinx",
+                            "deploymentconfig": "sphinx"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "sphinx",
+                                "image": "sphinx",
+                                "ports": [
+                                    {
+                                        "containerPort": 9312,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {}
+                    }
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "hitobito-ssl-internal",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "hitobito"
+                },
+                "annotations": {
+                    "openshift.io/host.generated": "true"
+                }
+            },
+            "spec": {
+                "host": "${APPLICATION_DOMAIN}",
+                "to": {
+                    "kind": "Service",
+                    "name": "hitobito"
+                },
+                "port": {
+                    "targetPort": "8080-tcp"
+                },
+                "tls": {
+                    "termination": "edge",
+                    "certificate": "",
+                    "key": "",
+                    "caCertificate": "",
+                    "insecureEdgeTerminationPolicy": "Redirect"
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "hitobito",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "hitobito"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "8080-tcp",
+                        "protocol": "TCP",
+                        "port": 8080,
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "app": "hitobito",
+                    "deploymentconfig": "hitobito"
+                },
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "memcached",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "memcached"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "11211-tcp",
+                        "protocol": "TCP",
+                        "port": 11211,
+                        "targetPort": 11211
+                    }
+                ],
+                "selector": {
+                    "app": "memcached",
+                    "deploymentconfig": "memcached"
+                },
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "mysql",
+                "creationTimestamp": null,
+                "labels": {
+                    "template": "mysql-persistent-template"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "mysql",
+                        "protocol": "TCP",
+                        "port": 3306,
+                        "targetPort": 3306
+                    }
+                ],
+                "selector": {
+                    "name": "mysql"
+                },
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "sphinx",
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "sphinx"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "9312-tcp",
+                        "protocol": "TCP",
+                        "port": 9312,
+                        "targetPort": 9312
+                    }
+                ],
+                "selector": {
+                    "app": "sphinx",
+                    "deploymentconfig": "sphinx"
+                },
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "backuppvc",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteMany"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${BACKUP_VOLUME_CAPACITY}"
+                    }
+                }
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "mysql",
+                "creationTimestamp": null,
+                "labels": {
+                    "template": "mysql-persistent-template"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${MYSQL_VOLUME_CAPACITY}"
+                    }
+                }
+            }
+        }
+    ],
+    "parameters": [
+        {
+            "name": "APPLICATION_DOMAIN",
+            "description": "The exposed hostname that will route to the swoa service, if left blank a value will be defaulted."
+        },
+        {
+            "name": "RAILS_ENV",
+            "description": "Rails env Variable",
+            "value": "production"
+        },
+        {
+            "name": "RAILS_SERVE_STATIC_FILES",
+            "description": "Serve static files",
+            "value": "1"
+        },
+        {
+            "name": "RAILS_DB_HOST",
+            "description": "Rails db host",
+            "value": "mysql"
+        },
+        {
+            "name": "RAILS_DB_ADAPTER",
+            "description": "Rails db adapter",
+            "value": "mysql2"
+        },
+        {
+            "name": "RAILS_HOST_NAME",
+            "description": "Rails host name used for link generation in emails"
+        },
+        {
+            "name": "RAILS_SPHINX_HOST",
+            "description": "sphinx host",
+            "value": "sphinx"
+        },
+        {
+            "name": "MEMCACHE_SERVERS",
+            "description": "memcache",
+            "value": "memcached:11211"
+        },
+        {
+            "name": "RAILS_ROOT_USER_EMAIL",
+            "description": "Rails root user email address",
+            "value": "example@hitobito.ch"
+        },
+        {
+            "name": "RAILS_MAIL_DELIVERY_CONFIG",
+            "description": "how to send Mails",
+            "value": "address: localhost, port: 25"
+        },
+        {
+            "name": "MYSQL_USER",
+            "description": "Database user name",
+            "value": "hitobito"
+        },
+        {
+            "name": "MYSQL_PASSWORD",
+            "description": "Database user password",
+            "value": "hitobito"
+        },
+        {
+            "name": "MYSQL_DATABASE",
+            "description": "Database name",
+            "value": "hitobito"
+        },
+        {
+            "name": "BACKUP_DATA_DIR",
+            "description": "where to store the Backups, typically this directory would be a persistent Volume",
+            "value": "/opt/app-root/backup/"
+        },
+        {
+            "name": "BACKUP_KEEP",
+            "description": "how many Backups are kept",
+            "value": "5"
+        },
+        {
+            "name": "BACKUP_MINUTE",
+            "description": "cron Minute (eg. 10) ",
+            "value": "10"
+        },
+        {
+            "name": "BACKUP_HOUR",
+            "description": " cron Hour (eg. 11,19) every day at 11am and 7pm",
+            "value": "11,19"
+        },
+        {
+            "name": "BACKUP_VOLUME_CAPACITY",
+            "displayName": "Volume Capacity",
+            "description": "Volume space available for backups, e.g. 512Mi, 2Gi.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "name": "MYSQL_VOLUME_CAPACITY",
+            "displayName": "Volume Capacity",
+            "description": "Volume space available for mysql database files, e.g. 512Mi, 2Gi.",
+            "value": "1Gi",
+            "required": true
+        }
+    ]
+}

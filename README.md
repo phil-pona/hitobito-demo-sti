@@ -28,6 +28,18 @@ therefore they are deployed as well and are available in the application templat
 oc new-project hitobito
 ```
 
+Create a the services incl. Persistent Storage
+
+```
+oc process -n openshift -f hitobito-demo-persistent.json \
+-v RAILS_ROOT_USER_EMAIL=example@hitobito.ch \
+-v RAILS_MAIL_DELIVERY_CONFIG="address: localhost, port: 25" \
+-v RAILS_HOST_NAME=demo.hitobito.ch |\
+oc create -f -
+```
+
+then install lets encrypt cert
+
 ### Manual Deployment
 
 ```
@@ -151,3 +163,8 @@ s2i build --scripts-url=file://.s2i/bin . centos/ruby-22-centos7 hitobito-s2i-ex
 ## TODO
 
 * Logging to standard out
+** memcached
+** sphinx
+** application
+* switch to puzzle rails base image
+* sphinx configuration with envs replace values in configfile from env, and application part from rails
