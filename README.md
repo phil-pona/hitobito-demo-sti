@@ -168,3 +168,4 @@ s2i build --scripts-url=file://.s2i/bin . centos/ruby-22-centos7 hitobito-s2i-ex
 ** application
 * switch to puzzle rails base image
 * sphinx configuration with envs replace values in configfile from env, and application part from rails
+* Delay jobs must run in foreground and log to the console
